@@ -1,0 +1,23 @@
+# Script that we run to bootstrap the system
+GITLAB_SCRIPT = <<EOF
+sudo apt-get update
+sudo apt-get install -y curl openssh-server ca-certificates postfix
+curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+sudo apt-get install -y gitlab-ce
+sudo gitlab-ctl reconfigure
+EOF
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu14.04"
+  config.vm.define :gitlab do |node|
+        node.vm.hostname = "gitlab"
+        node.vm.network :private_network, ip: "192.168.56.13"
+        node.vm.provision :shell, :inline => GITLAB_SCRIPT, :privileged => false
+  end
+  config.vm.provider "virtualbox" do |v|
+        v.gui = false
+        v.name = "Gitlab"
+        v.memory = 2048
+  end
+end
+

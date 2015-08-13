@@ -1,0 +1,24 @@
+# Script that we run to bootstrap the system
+JENKINS_SCRIPT = <<EOF
+sudo apt-get update
+sudo apt-get install -y openjdk-7-jre
+wget -q -O - https://jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins-ci.org/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo apt-get update
+sudo apt-get install -y jenkins
+EOF
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu14.04"
+  config.vm.define :jenkins do |node|
+        node.vm.hostname = "jenkins"
+        node.vm.network :private_network, ip: "192.168.56.14"
+        node.vm.provision :shell, :inline => JENKINS_SCRIPT, :privileged => false
+  end
+  config.vm.provider "virtualbox" do |v|
+        v.gui = false
+        v.name = "Jenkins"
+        v.memory = 512
+  end
+end
+

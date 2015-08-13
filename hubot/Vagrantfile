@@ -1,0 +1,27 @@
+# Script that we run to bootstrap the system
+HUBOT_SCRIPT = <<EOF
+sudo apt-get update
+sudo apt-get install -y nodejs npm
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+sudo npm install -g npm
+sudo npm install -g yo generator-hubot
+mkdir myhubot
+cd myhubot
+yo hubot
+sudo npm install hubot-lets-chat --save
+EOF
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu14.04"
+  config.vm.define :hubot do |node|
+        node.vm.hostname = "hubot"
+        node.vm.network :private_network, ip: "192.168.56.11"
+        node.vm.provision :shell, :inline => HUBOT_SCRIPT, :privileged => false
+  end
+  config.vm.provider "virtualbox" do |v|
+        v.gui = false
+        v.name = "Hubot"
+        v.memory = 512
+  end
+end
+
